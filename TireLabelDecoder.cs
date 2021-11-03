@@ -45,7 +45,8 @@ namespace Tire_Label_Decoder
 
         void UpdateTireLabel(string propertyName, string value)
         {
-            _label.GetType().GetProperty(propertyName).SetValue(_label, value);
+            var type = _label.GetType().GetProperty(propertyName).GetType();
+            _label.GetType().GetProperty(propertyName).SetValue(_label, (typeof(type)) value);
         }
 
         // metoda ktora bedzie po kolei wydobywac dla danego atrybutu i obrazu rzeczy
