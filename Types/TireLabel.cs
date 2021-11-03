@@ -30,7 +30,7 @@
 
         public override string ToString()
         {
-            return $"{Brand} {Eprel} {Width}/{Sidewall}/{Diameter} {NoiseRating}, {WetGrip}, {FuelEfficiency}";
+            return $"{Brand} {Eprel} {Width}/{Sidewall}/{Diameter} {NoiseRating}, {WetGrip}, {FuelEfficiency},";
         }
     }
 }
