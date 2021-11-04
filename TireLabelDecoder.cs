@@ -1,11 +1,12 @@
 ﻿using Patagames.Ocr;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text.RegularExpressions;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using Tire_Label_Decoder.Types;
 using Tire_Label_Decoder.Types.Abstract;
 
@@ -13,60 +14,57 @@ namespace Tire_Label_Decoder
 {
     public class TireLabelDecoder
     {
-        private TireLabel _label;
-        private Bitmap _image;
-
         public TireLabel GetTireLabelInfo(string path)
         {
-            _image = Image.FromFile(path) as Bitmap;
-            _label = new TireLabel();
-
-            PrepareRegions();
-
-            return _label;
+            var image = Image.FromFile(path) as Bitmap;
+            var url = GetUrlFromQRCode(image);
+            CreateTireLabel(url);
+            throw new NotImplementedException();
         }
 
-        void PrepareRegions()
+        private string GetUrlFromQRCode(Bitmap qrCode)
         {
-            var type = typeof(TireAttribute);
-            var types = AppDomain.CurrentDomain.GetAssemblies()
-                .SelectMany(s => s.GetTypes())
-                .Where(myType => myType.IsClass && !myType.IsAbstract && myType.IsSubclassOf(type));
-
-            foreach (var attribute in types)
+            try
             {
-                var instance = (TireAttribute) Activator.CreateInstance(attribute);
-                var attributeValue = GetAttributeValue(instance);
+                var qrCodeReader = new ZXing.QrCode.QRCodeReader();
+                var score = new ZXing.BitmapLuminanceSource(qrCode);
+                var binarizer = new ZXing.Common.HybridBinarizer(score);
+                var binaryBitmap = new ZXing.BinaryBitmap(binarizer);
+                var result = qrCodeReader.decode(binaryBitmap);
 
-                if(!string.IsNullOrEmpty(attributeValue))
-                    UpdateTireLabel(instance.AttributeName, attributeValue);
+                return result.Text;
             }
-        }
-
-        void UpdateTireLabel(string propertyName, string value)
-        {
-            var type = _label.GetType().GetProperty(propertyName).GetType();
-            _label.GetType().GetProperty(propertyName).SetValue(_label, (typeof(type)) value);
-        }
-
-        // metoda ktora bedzie po kolei wydobywac dla danego atrybutu i obrazu rzeczy
-        private string GetAttributeValue(TireAttribute attribute)
-        {
-            var rectangle = attribute.GetRectangle(_image.Height, _image.Width);
-            var format = _image.PixelFormat;
-            var region = _image.Clone(rectangle, format);
-
-            using (var api = OcrApi.Create())
+            catch (Exception)
             {
-                api.Init("", "eng");
-                string plainText = api.GetTextFromImage(region);
-                Debug.WriteLine(plainText);
-
-                if (!string.IsNullOrEmpty(plainText))
-                    return attribute.ProcessAttribute(plainText.Trim());
-                else
-                    return string.Empty;
+                // should throw an exception or skip and go on?
             }
+            return string.Empty;
+        }
+
+        TireLabel CreateTireLabel(string url)
+        {
+            WebRequest request = WebRequest.Create(url);
+            // If required by the server, set the credentials.
+            request.Credentials = CredentialCache.DefaultCredentials;
+            // Get the response.
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+            Console.WriteLine(response.ResponseUri.ToString());
+            // Display the status.
+            Console.WriteLine(response.StatusDescription);
+            // Get the stream containing content returned by the server.
+            Stream dataStream = response.GetResponseStream();
+            // Open the stream using a StreamReader for easy access.
+            StreamReader reader = new StreamReader(dataStream);
+            // Read the content.
+            string responseFromServer = reader.ReadToEnd();
+            // Display the content.
+            Console.WriteLine(responseFromServer);
+            // Cleanup the streams and the response.
+            reader.Close();
+            dataStream.Close();
+            response.Close();
+
+            throw new NotImplementedException();
         }
     }
 }
