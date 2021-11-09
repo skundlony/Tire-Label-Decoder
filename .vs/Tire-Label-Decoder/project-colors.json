@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "ProjectMap": {
+    "59e54f4d-f820-4654-a1ff-9184bf8b1612": {
+      "ProjectGuid": "59e54f4d-f820-4654-a1ff-9184bf8b1612",
+      "DisplayName": "Tire-Label-Decoder",
+      "ColorIndex": 0
+    }
+  },
+  "NextColorIndex": 1
+}
