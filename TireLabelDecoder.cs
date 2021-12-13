@@ -1,27 +1,26 @@
-﻿using Patagames.Ocr;
+﻿using Newtonsoft.Json;
 using System;
-using System.Diagnostics;
 using System.Drawing;
-using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Threading.Tasks;
 using Tire_Label_Decoder.Types;
-using Tire_Label_Decoder.Types.Abstract;
 
 namespace Tire_Label_Decoder
 {
     public class TireLabelDecoder
     {
+        private const string _baseUrl = @"https://eprel.ec.europa.eu/api/products/tyres/";
+
         public TireLabel GetTireLabelInfo(string path)
         {
             var image = Image.FromFile(path) as Bitmap;
             var url = GetUrlFromQRCode(image);
-            CreateTireLabel(url);
-            
-            return new TireLabel();
+
+            if (!string.IsNullOrEmpty(url))
+                return CreateTireLabel(url);
+            else
+                return null;
         }
 
         private string GetUrlFromQRCode(Bitmap qrCode)
@@ -38,18 +37,27 @@ namespace Tire_Label_Decoder
             }
             catch (Exception)
             {
-                // should throw an exception or skip and go on?
+                Console.WriteLine("Cannot read qrCode");
+                return string.Empty;
             }
-            return string.Empty;
         }
 
         TireLabel CreateTireLabel(string url)
         {
-            url = @"https://eprel.ec.europa.eu/screen/product/tyres/381801";
+            var eprelCode = url.Split('/')
+                .ToList()
+                .Last();
 
-            // we have to use chrome driver...
-             
-            throw new NotImplementedException();
+            var client = new HttpClient();
+
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(@"application/json"));
+            client.DefaultRequestHeaders.Add("User-Agent", @"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.93 Safari/537.36");
+
+            var response = client.GetStringAsync(_baseUrl + eprelCode);
+            var tireLabel = JsonConvert.DeserializeObject<TireLabel>(response.Result);
+
+            return tireLabel;
         }
     }
 }
