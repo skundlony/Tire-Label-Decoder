@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tire-Label-Decoder", "Tire-Label-Decoder.csproj", "{59E54F4D-F820-4654-A1FF-9184BF8B1612}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tire-Label-Decoder-Test", "..\Tire-Label-Decoder-Test\Tire-Label-Decoder-Test.csproj", "{251B55C7-77CF-49FB-B467-74CC305570D8}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,10 +15,6 @@ Global
 		{59E54F4D-F820-4654-A1FF-9184BF8B1612}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{59E54F4D-F820-4654-A1FF-9184BF8B1612}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{59E54F4D-F820-4654-A1FF-9184BF8B1612}.Release|Any CPU.Build.0 = Release|Any CPU
-		{251B55C7-77CF-49FB-B467-74CC305570D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{251B55C7-77CF-49FB-B467-74CC305570D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{251B55C7-77CF-49FB-B467-74CC305570D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{251B55C7-77CF-49FB-B467-74CC305570D8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
