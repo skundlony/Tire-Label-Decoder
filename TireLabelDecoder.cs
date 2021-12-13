@@ -1,7 +1,9 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Tire_Label_Decoder.Types;
@@ -12,10 +14,15 @@ namespace Tire_Label_Decoder
     {
         private const string _baseUrl = @"https://eprel.ec.europa.eu/api/products/tyres/";
 
-        public TireLabel GetTireLabelInfo(string path)
+        public TireLabel GetByQrCodeUrl(string qrCodeUrl)
         {
-            var image = Image.FromFile(path) as Bitmap;
-            var url = GetUrlFromQRCode(image);
+            WebClient client = new WebClient();
+
+            var stream = client.OpenRead(qrCodeUrl);
+            var image = Image.FromStream(stream) as Bitmap;
+            stream.Close();
+
+            var url = GetEprelDataFromQrCode(image);
 
             if (!string.IsNullOrEmpty(url))
                 return CreateTireLabel(url);
@@ -23,7 +30,12 @@ namespace Tire_Label_Decoder
                 return null;
         }
 
-        private string GetUrlFromQRCode(Bitmap qrCode)
+        public TireLabel GetByQrData (string qrData)
+        {
+            return CreateTireLabel(qrData);
+        }
+
+        private string GetEprelDataFromQrCode(Bitmap qrCode)
         {
             try
             {
@@ -32,22 +44,19 @@ namespace Tire_Label_Decoder
                 var binarizer = new ZXing.Common.HybridBinarizer(score);
                 var binaryBitmap = new ZXing.BinaryBitmap(binarizer);
                 var result = qrCodeReader.decode(binaryBitmap);
+                var eprelData = result.Text.Split('/').Last();
 
-                return result.Text;
+                return eprelData;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                Console.WriteLine("Cannot read qrCode");
+                Console.WriteLine("Cannot read qrCode " + ex.Message);
                 return string.Empty;
             }
         }
 
-        TireLabel CreateTireLabel(string url)
+        private TireLabel CreateTireLabel(string eprelCode)
         {
-            var eprelCode = url.Split('/')
-                .ToList()
-                .Last();
-
             var client = new HttpClient();
 
             client.DefaultRequestHeaders.Accept.Clear();
